@@ -101,14 +101,6 @@ tokenize(char *str, char **tokenArray, int *length) {
 
 
 /**
- * 
- * */
-char*    
-deserialize_tokens(char *token) {
-    
-}
-
-/**
  * Function for handling the builtin options for the shell.
  * */
 bool    
@@ -184,34 +176,68 @@ is_builtin(char **tokenArray, int len) {
     return false;
 }
 
+/**
+ * Function to fork a new process and execute the buffer 
+ * from the user
+ * */
 int
 fork_exec(char **tokenArray, int len) {
     pid_t   pid;
     int     w, status;
 
-    if((pid=fork()) == -1) {
-			fprintf(stderr, "shell: can't fork: %s\n",
-					strerror(errno));
-            exit_status = 127;
-    }
-    else if(pid == 0) {
+    if(len > 0) {
 
-        execvp(*tokenArray, tokenArray);
-        fprintf(stderr, "-sish: %s: %s\n", *tokenArray,
-					strerror(errno));
-        exit(127);
-    }
-    else
-    {
-        w = waitpid(pid, &status, 0);
+        if((pid=fork()) == -1) {
+                fprintf(stderr, "shell: can't fork: %s\n",
+                        strerror(errno));
+                exit_status = 127;
+        }
+        else if(pid == 0) {
+
+            execvp(*tokenArray, tokenArray);
+            fprintf(stderr, "-sish: %s: %s\n", *tokenArray,
+                        strerror(errno));
+            exit(127);
+        }
+        else
+        {
+            w = waitpid(pid, &status, 0);
+            if(status != 0) {
+                exit_status = 127;
+            } else {
+                exit_status = status;
+            }
+            if(WIFEXITED(status)) {
+                // exit_status = status;
+                // printf("Process terminated normally \n");
+            }
+            if(WIFSIGNALED(status)) {
+                printf("abnormal termination, signal number = %d %s\n", WTERMSIG(status), strsignal(WTERMSIG(status)));
+                printf("child process terminated abnormally \n");
+            }
+        }
+
+    } else {
+        fprintf(stderr, "-sish: couldn't execute cmd\n");
         exit_status = 127;
-        if(WIFEXITED(status)) {
-            // printf("Process terminated normally \n");
-        }
-        if(WIFSIGNALED(status)) {
-            printf("abnormal termination, signal number = %d %s\n", WTERMSIG(status), strsignal(WTERMSIG(status)));
-            printf("child process terminated abnormally \n");
-        }
     }
     
+}
+
+
+int     
+tokenize_pipe_cmds(char  *str, char **tokenArray, int  *length) {
+    char    *token;
+    
+    token = strtok(str, "|");
+
+    while (token != NULL) {
+        
+        tokenArray[*length] = token;
+        (*length)++;
+        token = strtok(NULL, "|");
+
+    }
+
+    return 0;
 }

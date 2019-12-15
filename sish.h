@@ -16,6 +16,7 @@
 int     exit_status; /* variable to store exit status */
 int     original_fd_out;
 int     original_fd_in;
+int     trace;
 
 char*   getinput(char *buffer, size_t buflen);
 void    sig_int(int);
@@ -24,4 +25,5 @@ bool    handle_builtin(char **tokenArray, int len);
 void    perform_echo(char **tokenArray, int len);
 bool    is_builtin(char **tokenArray, int len);
 int     fork_exec(char **tokenArray, int len);
-char*   deserialize_tokens(char *token);
+void    execute_buf(char *buf, char **tokenArray, int *length);
+int     tokenize_pipe_cmds(char  *str, char **tokenArray, int  *length);
