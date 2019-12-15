@@ -6,14 +6,15 @@ CFLAGS  = -g -Wall -Werror -Wextra -Wformat=2 -Wjump-misses-init -Wlogical-op -W
 
 # the build target executable:
 TARGET = sish
+UTILS = utils
 
 all: $(TARGET)
 
 $(TARGET): $(TARGET).c
-		$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).c
+		$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).c $(UTILS).c
 
 clean:
 		rm $(TARGET)
 	
 debug:
-		$(CC) -g -o $(TARGET) $(TARGET).c
+		$(CC) -g -o $(TARGET) $(TARGET).c $(UTILS).c
